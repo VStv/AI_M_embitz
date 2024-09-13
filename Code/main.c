@@ -63,7 +63,9 @@ uint32_t 	tmp_cycles_count, cycles_count[6] = {0};
 uint8_t 	led_st = 5;																// 0 - off, 1 - on, 2 - blink (4Hz), 3 - flash (1Hz, width - 1/240), 4 - blink (50Hz)
 uint32_t 	ram_adr = 0, test_cnt = 0;
 
-
+#ifdef _TICK_COUNT_ON_
+uint32_t    sample_cnt;
+#endif
 
 //---------------------------------------------------------------------------------------------
 //                                        Functions
@@ -312,19 +314,10 @@ int main(void)
 
 	while(1)
 	{
-		// firmware updating loop
-		if(start_obr == 3)
-		{
-//#ifdef _BOOTLOADER_ON_
-			FirmwUpdate(&numb_Rec_byte, input, &numb_Trans_byte, izmer, &firmw_ctrl);
-//#endif
-			start_obr = 0;
-		}
-
-
 		// normal mode loop
-		if(start_obr == 2)
+        if(start_obr == 2)
 		{
+			start_obr = 0;
 
 #ifdef _TICK_COUNT_ON_
 			DWT->CYCCNT = 0; 																// Reset tick counter
@@ -598,19 +591,28 @@ int main(void)
 				default:
 					break;
 			}
-			start_obr = 0;
-//			if(rtc_err != (int32_t)(-1))
-//				rtc_err = RtcInit(&rtc_err);
+
 #ifdef _TICK_COUNT_ON_
 			// Read tick counter
 			tmp_cycles_count = DWT->CYCCNT;
-			if(tmp_cycles_count > cycles_count[adc_sample.sample_num % 6])
+//			DWT->CYCCNT = 0; 																// Reset tick counter
+            sample_cnt = adc_sample.sample_num % 6;
+			if(tmp_cycles_count > cycles_count[sample_cnt])
 			{
-				cycles_count[adc_sample.sample_num % 6] = tmp_cycles_count;
+				cycles_count[sample_cnt] = tmp_cycles_count;
 				if(tmp_cycles_count > (SystemCoreClock/SYSTICK_IRQ_FREQ))
 					led_st = 2;
 			}
 #endif
+		}
+
+		// firmware updating loop
+		else if(start_obr == 3)
+		{
+			start_obr = 0;
+//#ifdef _BOOTLOADER_ON_
+			FirmwUpdate(&numb_Rec_byte, input, &numb_Trans_byte, izmer, &firmw_ctrl);
+//#endif
 		}
 	}
 }

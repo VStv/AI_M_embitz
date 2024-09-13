@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <EmBitz_debug_session>
 	<debuggerLastSession>
-		<breakpoints>
-			<break type="0" enabled="1" file="Code/main.c" line="490" />
-		</breakpoints>
 		<watches>
 			<watch key="VersProg" format="0" array="0" start="0" count="0" expanded="0" live="0" />
 			<watch key="settng_upd_ctrl" format="0" array="0" start="0" count="0" expanded="1" live="1" />
